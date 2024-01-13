@@ -10,7 +10,8 @@ Dependencies and Libraries used:
 
 Features
 
+0. Map Display
 1. Search functionality
 2. Location pinning (retrieves the co ordinates on top of the screen)
-3. Map panning and zooming
-4. Responsive application
+3. User interaction (Map panning and zooming)
+4. Responsive design
