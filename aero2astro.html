@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder@1.13.0/dist/Control.Geocoder.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder@1.13.0/dist/Control.Geocoder.js"></script>
+    <style>
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            cursor: auto; 
+        }
+
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: none;
+        }
+
+        #penBtn {
+            position: absolute;
+            top: 60px;
+            right: 10px;
+            background-color: rgb(200, 221, 82);
+            color: black;
+            border-radius: 10px;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="title">
+        AERO2ASTRO
+    </div>
+    <div id="map"></div>
+    <div id="info"></div>
+    <button id="penBtn" onclick="activatePenMode()">Pin a location</button>
+
+    <script>
+        var map = L.map('map').setView([0, 0], 1);
+
+        L.tileLayer('https://api.maptiler.com/maps/topo-v2/{z}/{x}/{y}.png?key=yZgF5x2JRsLygBgIcKD3', {
+            attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
+        }).addTo(map);
+
+        var geocoder = L.Control.geocoder({
+            defaultMarkGeocode: false
+        })
+            .on('markgeocode', function (e) {
+                var latlng = e.geocode.center;
+                map.flyTo(latlng, 10);
+            })
+            .addTo(map);
+
+        var infoDiv = document.getElementById('info');
+        var penBtn = document.getElementById('penBtn');
+
+        var markers = L.layerGroup().addTo(map);
+        var penMode = false;
+
+        function activatePenMode() {
+            penMode = true;
+            map.dragging.disable(); // disable dragging
+            map.on('click', function (e) {
+                if (penMode) {
+                    var marker = L.marker(e.latlng).addTo(markers);
+                    marker.bindPopup('Coordinates: ' + e.latlng.toString()).openPopup();
+                    displaySnackbar('Marker added at ' + e.latlng.toString());
+                }
+            });
+
+            // change cursor style 
+            map.getContainer().style.cursor = 'crosshair';
+        }
+
+        // Snackbar fn
+        function displaySnackbar(message) {
+            infoDiv.innerHTML = message;
+            infoDiv.style.display = 'block';
+        }
+
+        // click listener
+        map.on('click', function () {
+            if (penMode) {
+                penMode = false;
+                map.dragging.enable(); // dragging ON
+                map.off('click'); // Remove 
+                map.getContainer().style.cursor = 'auto'; // Reset cursor styel
+                infoDiv.style.display = 'none'; // Hide snackbar
+            }
+        });
+    </script>
+</body>
+
+</html>
